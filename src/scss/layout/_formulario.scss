@@ -1,0 +1,16 @@
+.formulario {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo {
+    label {
+        color: $blanco;
+    }
+    input {
+        margin: 2rem;
+        width: 75%;
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+}

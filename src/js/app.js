@@ -1,5 +1,15 @@
 let pagina = 1;
 
+const cita = {
+
+    nombre: '',
+    fecha: '',
+    hora: '',
+    servicios: []
+
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     iniciarApp();
 
@@ -26,6 +36,22 @@ function iniciarApp() {
     //Comprueba la pagina actual para ocultar o mostrar la paginacion
 
     botonesPaginador();
+
+    //Muestra el resumen de la cita ( o mensaje de error en caso de no pasar la validacion)
+
+    mostrarResumen();
+
+    //Almacena el nombre de la cita en el objeto
+
+    nombreCita();
+
+    //Almacena la fecha en el objeto
+
+    fechaCita();
+
+    //Deshabilitar fecha anterior
+
+    deshabilitarFecha();
 }
 
 function botonesPaginador() {
@@ -40,6 +66,8 @@ function botonesPaginador() {
 
         paginaSiguiente.classList.add('ocultar');
         paginaAnterior.classList.remove('ocultar');
+
+        mostrarResumen(); // Estamos en la página 3 , carga el resumen de la cita
 
     } else {
         paginaAnterior.classList.remove('ocultar');
@@ -75,12 +103,6 @@ function mostrarSeccion() {
     if (seccionAnterior) {
         seccionAnterior.classList.remove('mostrar-seccion');
     }
-
-
-
-
-
-
     const seccionActual = document.querySelector(`#paso-${pagina}`);
     seccionActual.classList.add('mostrar-seccion');
 
@@ -187,7 +209,135 @@ function seleccionarServicio(e) {
 
     if (elemento.classList.contains('seleccionado')) {
         elemento.classList.remove('seleccionado');
+        const id = parseInt(elemento.dataset.idServicio);
+
+        eliminarServicio(id);
     } else {
         elemento.classList.add('seleccionado');
+
+        console.log(elemento.firstElementChild.nextElementSibling.textContent);
+        const servicioObj = {
+            id: parseInt(elemento.dataset.idServicio),
+            nombre: elemento.firstElementChild.textContent,
+            precio: elemento.firstElementChild.nextElementSibling.textContent
+        }
+
+        //console.log(servicioObj);
+
+        agregarServicio(servicioObj);
     }
+}
+
+function agregarServicio(servicioObj) {
+    const { servicios } = cita;
+    cita.servicios = [...servicios, servicioObj];
+
+    console.log(cita);
+}
+
+function eliminarServicio(id) {
+    const { servicios } = cita;
+
+    cita.servicios = servicios.filter(servicio => servicio.id !== id);
+
+    console.log(cita);
+}
+
+function mostrarResumen() {
+
+    //Destructuring
+    const { nombre, hora, fecha, servicios } = cita;
+
+    //Seleccionar resumen
+
+    const resumenDiv = document.querySelector('.contenedor-resumen');
+
+    if (Object.values(cita).includes('')) {
+        const pResumen = document.createElement('P');
+        pResumen.textContent = 'Algunos datos están vacios, comprueba el nombre , fecha , hora y reserva de la cita';
+        pResumen.classList.add('invalidar-cita');
+
+        //Agregamos a resumen Div el texto 
+        resumenDiv.appendChild(pResumen);
+    } else {
+        console.log('Todo OK');
+    }
+}
+
+
+function nombreCita() {
+    const nombreInput = document.querySelector('#nombre');
+
+    nombreInput.addEventListener('input', e => {
+        const nombreTexto = e.target.value.trim();
+
+        //Validacion de que nombreTexto tiene que tener algo
+
+        if (nombreTexto === '' || nombreTexto.length < 3) {
+            mostrarAlerta('Nombre no valido', 'error');
+
+        } else {
+            const alerta = document.querySelector('.alerta');
+            if (alerta) {
+                alerta.remove();
+            }
+            cita.nombre = nombreTexto;
+
+        }
+
+    })
+}
+
+function mostrarAlerta(mensaje, tipo) {
+    //Si tenemos alerta no agregar más.
+
+    const alertaPrevia = document.querySelector('.alerta');
+    if (alertaPrevia) {
+        return;
+    }
+
+    const alerta = document.createElement('DIV');
+    alerta.textContent = mensaje;
+    alerta.classList.add('alerta');
+
+    if (tipo === 'error') {
+        alerta.classList.add('error')
+    }
+
+    //Insertar en el formulario
+
+    const formulario = document.querySelector('.formulario');
+    formulario.appendChild(alerta);
+
+    setTimeout(() => {
+        alerta.remove();
+    }, 3000);
+
+}
+
+function fechaCita() {
+    const fechaInput = document.querySelector('#fecha');
+    fechaInput.addEventListener('input', e => {
+        const dia = new Date(e.target.value).getUTCDay();
+        if ([0, 6].includes(dia)) {
+            e.preventDefault();
+            fechaInput.value = "";
+            mostrarAlerta('La tienda esta cerrada');
+        } else {
+            cita.fecha = fechaInput.value;
+            console.log(cita);
+        }
+
+    })
+}
+
+function deshabilitarFecha() {
+    const inputFecha = document.querySelector('#fecha');
+    const fechaAhora = new Date();
+    const year = fechaAhora.getFullYear();
+    const mes = fechaAhora.getMonth() + 1;
+    const dia = fechaAhora.getDate() + 1;
+    //Formato deseado : AAAA-MM-DD
+    const fechaDeshabilitar = `${year}-${mes}-${dia}`;
+    inputFecha.min = fechaDeshabilitar;
 }

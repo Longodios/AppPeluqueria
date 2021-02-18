@@ -1,16 +1,31 @@
 .formulario {
-    display: flex;
-    flex-direction: column;
+    width: 100%;
 }
 
 .campo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
     label {
+        //Factor de crecimiento con Flex
+        flex: 0 0 10rem; // No tiene factor de crecimiento con el primer 0 , el segundo es para hacerlo mas pequeño y su BASE es el tercero y va a ser de 10rem;
         color: $blanco;
     }
     input {
-        margin: 2rem;
-        width: 75%;
-        padding: 1.5rem;
+        flex: 1;
+        padding: $separacion / 4;
+        border: none;
         border-radius: 1rem;
+    }
+}
+
+.alerta {
+    padding: $separacion / 2;
+    text-align: center;
+    color: $blanco;
+    width: 100%;
+    display: block;
+    &.error {
+        background-color: rgb(194, 0, 0);
     }
 }
